@@ -1,7 +1,6 @@
 import { Request, Response } from 'express';
-import { listarFilmesService } from '../service/filmes.service.js';
-import { listarFilmePorIdService } from '../service/filmes.service.js';
-import { inserirFilmeNovoService } from '../service/filmes.service.js';
+import { atualizarFilmeService, deletarFilmesService, listarFilmesService, listarFilmePorIdService, inserirFilmeNovoService, atualizarColunasService } from '../service/filmes.service.js';
+
 
 export async function buscarFilmes(req: Request, res: Response) {
   try {
@@ -46,24 +45,39 @@ export async function inserirNovoFilme (req: Request, res: Response) {
     res.status(500).json({ erro: 'Erro interno no servidor' });
   } }
 
-  export async function atualizarFilme(req:Request, res:Response){
+  export async function atualizarFilme(req: Request, res: Response) {
   try {
-      const {id} = req.params
-      const {titulo, genero, diretor, ano_lancamento, roteirista, sinopse, nota} = req.body
-      
-      const resultado = await pool.query('UPDATE filmes  SET titulo = $1, genero = $2, diretor = $3, ano_lancamento = $4, roteirista = $5, sinopse = $6, nota=$7 WHERE id = $8', [titulo, genero, diretor, ano_lancamento, roteirista, sinopse, nota, id])
-    
-    if(resultado.rowCount === 0) {
-       res.status(404).json({erro: 'Filme não encontrado'})
-       return
+    const { id } = req.params;
+    const { titulo, genero, diretor, ano_lancamento, roteirista, sinopse, nota } = req.body;
+
+    if (!titulo || !genero || !diretor || !ano_lancamento || !roteirista || !sinopse || nota === undefined || !id) {
+      res.status(400).json({ erro: 'Preencha todos os campos obrigatórios' });
+      return;
     }
 
-    res.json({mensagem:'Filme atualizado com sucesso!'})
+    const resultado = await atualizarFilmeService(
+      titulo,
+      genero,
+      diretor,
+      ano_lancamento,
+      roteirista,
+      sinopse,
+      nota,
+      id as string
+    );
 
-  } catch(erro){
+    
+    if (!resultado) {
+      res.status(404).json({ erro: 'Filme não encontrado' });
+      return;
+    }
+
+    res.json(resultado);
+  } catch (erro) {
     console.error('Erro ao atualizar o filme:', erro);
-    res.status(500).json({erro:'Erro interno no servidor'})
-  }}
+    res.status(500).json({ erro: 'Erro interno no servidor' });
+  }
+}
 
   export async function atualizarColunas(req: Request, res: Response) {
   try{
@@ -75,21 +89,15 @@ export async function inserirNovoFilme (req: Request, res: Response) {
         res.status(400).json({erro: 'Nenhum campo fornecido para atualização'})
         return
       }
+      const resultado = await atualizarColunasService (campos, valores, id as string)
+  
 
-      const setClauses = campos.map((campo, index) => `${campo} = $${index + 1}`)
-      valores.push(id)
-      const posicaoId = valores.length
-
-      const queryText = `UPDATE filmes SET ${setClauses.join(', ')} WHERE id = $${posicaoId} RETURNING *`;
-
-      const resultado = await pool.query(queryText, valores);
-
-      if (resultado.rowCount === 0) {
+      if (!resultado) {
         res.status(404).json({erro: 'Filme não encontrado'})
         return
       }
 
-      res.json(resultado.rows[0])
+      res.json(resultado)
 
     } catch(erro){
       console.error('Erro ao atualizar o filme:', erro);
@@ -99,9 +107,9 @@ export async function inserirNovoFilme (req: Request, res: Response) {
   export async function deletarFilme (req: Request, res: Response) {
      try {
       const {id} = req.params
-      const resultado = await pool.query('DELETE FROM filmes WHERE id = $1', [id])
+      const resultado = await deletarFilmesService(id as string)
 
-      if(resultado.rowCount ===0){
+      if(!resultado){
         res.status(404).json({erro:'Filme não encontrado'})
         return
       }
