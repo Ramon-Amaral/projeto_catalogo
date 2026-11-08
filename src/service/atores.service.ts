@@ -5,3 +5,9 @@ export async function listarAtoresService(){
   return resultado.rows
 
 }
+
+export async function buscarAtoresPorIdService(id: string){
+  const resultado = await pool.query ('SELECT * FROM ATORES WHERE id = $1', [id])
+  return resultado.rows[0] || null
+
+}
