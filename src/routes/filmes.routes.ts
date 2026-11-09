@@ -1,20 +1,20 @@
 import { Router } from "express";
 import {
-  buscarFilmes, 
+  buscarFilmes,
   buscarFilmesporID,
   inserirNovoFilme,
   atualizarFilme,
   atualizarColunas,
-  deletarFilme
-} from '../controllers/filmes.controller.js'
+  deletarFilme,
+} from "../controllers/filmes.controller.js";
 
 const router = Router();
 
-router.get('/', buscarFilmes);
-router.get('/:id', buscarFilmesporID)
-router.post('/', inserirNovoFilme)
-router.put('/:id', atualizarFilme)
-router.patch('/:id', atualizarColunas)
-router.delete('/:id', deletarFilme)
+router.get("/filmes", buscarFilmes);
+router.get("/filmes/:id", buscarFilmesporID);
+router.post("/filmes", inserirNovoFilme);
+router.put("/filmes/:id", atualizarFilme);
+router.patch("/filmes/:id", atualizarColunas);
+router.delete("/filmes/:id", deletarFilme);
 
-export default router
+export default router;
