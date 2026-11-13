@@ -11,7 +11,8 @@ CREATE TABLE filmes (
   roteirista VARCHAR(100) NOT NULL,
   premios VARCHAR(250),
   sinopse TEXT NOT NULL,
-  nota DECIMAL(3,1) NOT NULL 
+  nota_pessoal DECIMAL(3,1) NOT NULL, 
+  nota_rotten VARCHAR(10)
 );
 
 CREATE TABLE atores (

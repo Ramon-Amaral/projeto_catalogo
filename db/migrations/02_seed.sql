@@ -1,6 +1,6 @@
 TRUNCATE TABLE elenco, atores, filmes RESTART IDENTITY;
 
-INSERT INTO filmes (titulo, ano_lancamento, genero, diretor, roteirista, premios, sinopse, nota) VALUES
+INSERT INTO filmes (titulo, ano_lancamento, genero, diretor, roteirista, premios, sinopse, nota_pessoal) VALUES
   ('Matrix', 1999, 'Ficção Científica', 'Lana Wachowski', 'Lana Wachowski', 'Vencedor de 4 Oscars', 'Um jovem programador descobre que a realidade é uma simulação.', 8.7),
   ('O Cavaleiro das Trevas', 2008, 'Ação', 'Christopher Nolan', 'Christopher Nolan', 'Vencedor de 2 Oscars', 'Batman combate o caos instalado pelo Coringa em Gotham City.', 9.0),
   ('A Origem', 2010, 'Ficção Científica', 'Christopher Nolan', 'Christopher Nolan', 'Vencedor de 4 Oscars', 'Um ladrão rouba segredos corporativos usando tecnologia de compartilhamento de sonhos.', 8.8),
