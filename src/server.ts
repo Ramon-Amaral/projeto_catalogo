@@ -1,4 +1,5 @@
 import express from 'express';
+import cors from 'cors';
 import { iniciarCronJobs } from './jobs/syncRotten.job.js';
 import filmesRoutes from './routes/filmes.routes.js'
 import elencoRoutes from './routes/elenco.routes.js'
@@ -8,6 +9,7 @@ import atoresRoutes from './routes/atores.routes.js'
 const app = express();
 const PORT = process.env.PORT || 3000
 
+app.use(cors())
 app.use(express.json());
 
 app.use(filmesRoutes);
