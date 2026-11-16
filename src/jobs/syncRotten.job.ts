@@ -35,3 +35,10 @@ export async function sincronizarNotasRotten(): Promise<void> {
     console.error('[CRON] Erro ao consultar filmes no banco:', erroBanco);
   }
 }
+
+export function iniciarCronJobs(): void {
+  cron.schedule('0 3 * * *', async () => {
+    await sincronizarNotasRotten()
+  })
+  console.log('[CRON] Agendamento de sincronização configurado')
+}
