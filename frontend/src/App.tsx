@@ -27,6 +27,11 @@ function App() {
     setNota_pessoal("");
   }
 
+  async function handleExcluir(id:number) {
+    await api.delete(`/filmes/${id}`)
+    setFilmes(filmes.filter((filme) => filme.id !== id))
+    
+  }
   return (
     <div>
       <h1>Catálogo de Filmes</h1>
@@ -35,6 +40,11 @@ function App() {
           <h2>{filme.titulo}</h2>
           <p>{filme.diretor}</p>
           <p>{filme.ano_lancamento}</p>
+
+          <button type="button" onClick={() => handleExcluir(filme.id)}>
+            Excluir
+
+          </button>
         </div>
       ))}
 
