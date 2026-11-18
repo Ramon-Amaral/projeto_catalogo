@@ -7,6 +7,7 @@ function App() {
   const [titulo, setTitulo] = useState("");
   const [sinopse, setSinopse] = useState("");
   const [nota_pessoal, setNota_pessoal] = useState("");
+  const [idEditando, setIdEditando] = useState <number | null>(null);
 
   useEffect(() => {
     api.get("/filmes").then((response) => {
@@ -14,14 +15,28 @@ function App() {
     });
   }, []);
 
-  async function handleCadastrar(e: SubmitEvent<HTMLFormElement>) {
+  async function handleSalvar(e: SubmitEvent<HTMLFormElement>) {
     e.preventDefault();
+   if (idEditando) {
+    const response = await api.put(`/filmes/${idEditando}`, {
+      titulo,
+      sinopse,
+      nota_pessoal: Number(nota_pessoal),
+    })
+
+    setFilmes(
+      filmes.map((filme) => (filme.id === idEditando ? response.data : filme))
+  );
+  setIdEditando(null);
+    } else {
+
     const response = await api.post("/filmes", {
       titulo,
       sinopse,
       nota_pessoal: Number(nota_pessoal),
     });
     setFilmes([...filmes, response.data]);
+   }
     setTitulo("");
     setSinopse("");
     setNota_pessoal("");
@@ -30,7 +45,16 @@ function App() {
   async function handleExcluir(id:number) {
     await api.delete(`/filmes/${id}`)
     setFilmes(filmes.filter((filme) => filme.id !== id))
+     }
     
+    async function handleSelecionarEdicao (filme: Filme) {
+      setIdEditando(filme.id)
+      setTitulo(filme.titulo)
+      setSinopse(filme.sinopse || "")
+      setNota_pessoal(filme.nota_pessoal ? String(filme.nota_pessoal) : "")
+
+   
+
   }
   return (
     <div>
@@ -43,17 +67,21 @@ function App() {
 
           <button type="button" onClick={() => handleExcluir(filme.id)}>
             Excluir
+          </button>
 
+          <button type="button" onClick={() => handleSelecionarEdicao(filme)}>
+            Editar
           </button>
         </div>
       ))}
 
-      <form onSubmit={handleCadastrar}>
+      <form onSubmit={handleSalvar}>
         <input
           type="text"
           placeholder="Título do Filme"
           value={titulo}
           onChange={(e) => setTitulo(e.target.value)}
+          disabled={idEditando !== null}
         />
 
         <input
@@ -70,7 +98,7 @@ function App() {
           onChange={(e) => setNota_pessoal(e.target.value)}
         />
 
-        <button type="submit">Cadastrar</button>
+        <button type="submit">{idEditando? "Salvar Alterações" : "Cadastrar"}</button>
       </form>
     </div>
   );
