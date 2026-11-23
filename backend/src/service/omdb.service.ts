@@ -13,6 +13,7 @@ export interface OmdbResponse {
   Writer?: string;
   Actors?: string;
   Awards?: string;
+  Poster?: string;
   Ratings?: OmdbRating[];
   Response: 'True' | 'False';
   Error?: string;

@@ -31,10 +31,11 @@ export async function inserirFilmeNovoService(
   const roteirista = dadosOmdb.Writer || "Desconhecido";
   const premios = dadosOmdb.Awards || "N/A";
   const nota_rotten = extrairNotaRotten(dadosOmdb.Ratings);
+  const poster_url = dadosOmdb.Poster && dadosOmdb.Poster !== "N/A" ? dadosOmdb.Poster : null;
 
   const filmeInserido = `
-      INSERT INTO filmes (titulo, genero, diretor, ano_lancamento, roteirista, sinopse, nota_pessoal, premios, nota_rotten)
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+      INSERT INTO filmes (titulo, genero, diretor, ano_lancamento, roteirista, sinopse, nota_pessoal, premios, nota_rotten, poster_url)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
       RETURNING *`;
 
   const valores = [
@@ -47,6 +48,7 @@ export async function inserirFilmeNovoService(
     nota_pessoal,
     premios,
     nota_rotten,
+    poster_url,
   ];
   const resultado = await pool.query(filmeInserido, valores);
 
@@ -71,9 +73,10 @@ export async function atualizarFilmeService(
   const roteirista = dadosOmdb.Writer || "Desconhecido";
   const premios = dadosOmdb.Awards || "N/A";
   const nota_rotten = extrairNotaRotten(dadosOmdb.Ratings);
+  const poster_url = dadosOmdb.Poster && dadosOmdb.Poster !== "N/A" ? dadosOmdb.Poster : null
 
   const filmeAtualizado = await pool.query(
-    "UPDATE filmes  SET titulo = $1, genero = $2, diretor = $3, ano_lancamento = $4, roteirista = $5, sinopse = $6, nota_pessoal=$7, premios = $8, nota_rotten = $9 WHERE id = $10 RETURNING *",
+    "UPDATE filmes  SET titulo = $1, genero = $2, diretor = $3, ano_lancamento = $4, roteirista = $5, sinopse = $6, nota_pessoal=$7, premios = $8, nota_rotten = $9, poster_url =$10 WHERE id = $11 RETURNING *",
     [
       titulo,
       genero,
@@ -84,6 +87,7 @@ export async function atualizarFilmeService(
       nota_pessoal,
       premios,
       nota_rotten,
+      poster_url,
       id,
     ],
   );
