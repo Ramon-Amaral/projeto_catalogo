@@ -17,6 +17,7 @@ export interface TmdbCastCredit {
   original_title?: string;
   character?: string;
   order?: number;
+  genre_ids?: number[];
 }
 
 interface TmdbPersonDetails {
@@ -37,6 +38,46 @@ export interface DadosAtorTmdb {
 
 const TMDB_BASE_URL = "https://api.themoviedb.org/3";
 const TMDB_IMAGE_BASE_URL = "https://image.tmdb.org/t/p/w500";
+
+const GENEROS_TMDB: Record<number, string> = {
+  28: "Ação",
+  12: "Aventura",
+  16: "Animação",
+  35: "Comédia",
+  80: "Crime",
+  18: "Drama",
+  10751: "Família",
+  14: "Fantasia",
+  36: "História",
+  27: "Terror",
+  10402: "Música",
+  9648: "Mistério",
+  10749: "Romance",
+  878: "Ficção Científica",
+  53: "Suspense",
+  10752: "Guerra",
+  37: "Faroeste",
+};
+
+function calcularGenerosPrincipais(creditos: TmdbCastCredit[]): string | null {
+  const contagem: Record<number, number> = {};
+
+  for (const filme of creditos) {
+    if (!filme.genre_ids) continue;
+    for (const id of filme.genre_ids) {
+      if (GENEROS_TMDB[id]) {
+        contagem[id] = (contagem[id] || 0) + 1;
+      }
+    }
+  }
+
+  const principais = Object.entries(contagem)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 2)
+    .map(([id]) => GENEROS_TMDB[Number(id)]);
+
+  return principais.length > 0 ? principais.join(", ") : null;
+}
 
 export async function buscarDadosAtorNaTmdb(nome: string): Promise<DadosAtorTmdb | null> {
   const apiKey = process.env.TMDB_API_KEY;
@@ -71,13 +112,13 @@ export async function buscarDadosAtorNaTmdb(nome: string): Promise<DadosAtorTmdb
 
     const detalhes = detailsResponse.data;
     const caminhoFoto = detalhes.profile_path || primeiroResultado.profile_path;
-    const departamento = detalhes.known_for_department || primeiroResultado.known_for_department;
+    const creditos = detalhes.movie_credits?.cast || [];
 
     return {
       foto_url: caminhoFoto ? `${TMDB_IMAGE_BASE_URL}${caminhoFoto}` : null,
       data_nascimento: detalhes.birthday || null,
-      genero_atuacao: departamento === "Acting" ? "Atuação" : departamento || null,
-      creditos: detalhes.movie_credits?.cast || [],
+      genero_atuacao: calcularGenerosPrincipais(creditos),
+      creditos,
     };
   } catch (error) {
     console.error("Erro ao consultar TMDB API:", error);

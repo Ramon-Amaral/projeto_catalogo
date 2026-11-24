@@ -34,8 +34,8 @@ export function AtorCard({ ator, onEditar, onExcluir }: AtorCardProps) {
           <p className="text-sm text-zinc-400">Nascimento: {dataFormatada}</p>
         )}
 
-        {ator.genero_atuacao && (
-          <p className="text-sm text-zinc-400">Área: {ator.genero_atuacao}</p>
+        {ator.genero_atuacao && ator.genero_atuacao !== "Atuação" && (
+          <p className="text-sm text-zinc-400">Gênero: {ator.genero_atuacao}</p>
         )}
 
         {ator.premio && (

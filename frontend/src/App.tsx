@@ -49,18 +49,22 @@ function App() {
   } | null>(null);
   const [excluindo, setExcluindo] = useState(false);
 
+  async function sincronizarEmSegundoPlano() {
+    const [resFilmes, resAtores, resElencos] = await Promise.all([
+      api.get("/filmes"),
+      api.get("/atores"),
+      api.get("/elencos"),
+    ]);
+    setFilmes(resFilmes.data);
+    setAtores(resAtores.data);
+    setElencos(resElencos.data);
+  }
+
   async function carregarDados() {
     try {
       setCarregando(true);
       setErro("");
-      const [resFilmes, resAtores, resElencos] = await Promise.all([
-        api.get("/filmes"),
-        api.get("/atores"),
-        api.get("/elencos"),
-      ]);
-      setFilmes(resFilmes.data);
-      setAtores(resAtores.data);
-      setElencos(resElencos.data);
+      await sincronizarEmSegundoPlano();
     } catch {
       setErro("Não foi possível carregar os dados. Verifique se a API está rodando.");
     } finally {
@@ -88,21 +92,21 @@ function App() {
       setErro("");
 
       if (idFilmeEditando) {
-        const response = await api.put(`/filmes/${idFilmeEditando}`, {
+        await api.put(`/filmes/${idFilmeEditando}`, {
           titulo: titulo.trim(),
           sinopse: sinopse.trim(),
           nota_pessoal: notaNumerica,
         });
-        setFilmes(filmes.map((f) => (f.id === idFilmeEditando ? response.data : f)));
         setIdFilmeEditando(null);
       } else {
-        const response = await api.post("/filmes", {
+        await api.post("/filmes", {
           titulo: titulo.trim(),
           sinopse: sinopse.trim(),
           nota_pessoal: notaNumerica,
         });
-        setFilmes([...filmes, response.data]);
       }
+
+      await sincronizarEmSegundoPlano();
 
       setTitulo("");
       setSinopse("");
@@ -152,13 +156,13 @@ function App() {
       };
 
       if (idAtorEditando) {
-        const response = await api.put(`/atores/${idAtorEditando}`, payload);
-        setAtores(atores.map((a) => (a.id === idAtorEditando ? response.data : a)));
+        await api.put(`/atores/${idAtorEditando}`, payload);
         setIdAtorEditando(null);
       } else {
-        const response = await api.post("/atores", payload);
-        setAtores([...atores, response.data]);
+        await api.post("/atores", payload);
       }
+
+      await sincronizarEmSegundoPlano();
 
       setNomeAtor("");
       setDataNascimentoAtor("");
@@ -178,7 +182,11 @@ function App() {
     setDataNascimentoAtor(
       ator.data_nascimento ? ator.data_nascimento.slice(0, 10) : ""
     );
-    setGeneroAtor(ator.genero_atuacao || "");
+    setGeneroAtor(
+      ator.genero_atuacao && ator.genero_atuacao !== "Atuação"
+        ? ator.genero_atuacao
+        : ""
+    );
     setPremioAtor(ator.premio || "");
     setModalAtorAberto(true);
   }
