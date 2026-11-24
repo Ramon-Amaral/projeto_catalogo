@@ -10,6 +10,7 @@ import { AtorModal } from "./components/AtorModal";
 import { ElencoModal } from "./components/ElencoModal";
 
 type AbaAtiva = "filmes" | "atores";
+type OrdenacaoFilme = "recentes" | "titulo" | "nota_desc" | "nota_asc";
 
 function App() {
   const [abaAtiva, setAbaAtiva] = useState<AbaAtiva>("filmes");
@@ -22,6 +23,8 @@ function App() {
   const [idFilmeEditando, setIdFilmeEditando] = useState<number | null>(null);
   const [busca, setBusca] = useState("");
   const [filtroNota, setFiltroNota] = useState("");
+  const [ordenacaoFilme, setOrdenacaoFilme] =
+    useState<OrdenacaoFilme>("recentes");
 
   const [atores, setAtores] = useState<Ator[]>([]);
   const [nomeAtor, setNomeAtor] = useState("");
@@ -265,22 +268,35 @@ function App() {
     if (numero >= 0 && numero <= 10) setter(padronizado);
   }
 
-  const filmeFiltrado = filmes.filter((filme) => {
-    const termo = busca.trim().toLowerCase();
-    const bateTitulo = filme.titulo.toLowerCase().includes(termo);
-    const bateAtorNoElenco = elencos.some(
-      (e) => e.filme_id === filme.id && e.ator.toLowerCase().includes(termo),
-    );
+  const filmeFiltrado = filmes
+    .filter((filme) => {
+      const termo = busca.trim().toLowerCase();
+      const bateTitulo = filme.titulo.toLowerCase().includes(termo);
+      const bateAtorNoElenco = elencos.some(
+        (e) => e.filme_id === filme.id && e.ator.toLowerCase().includes(termo),
+      );
 
-    const notaFilme = Number(filme.nota_pessoal);
-    const compararNota =
-      filtroNota === "" ||
-      (filtroNota.includes(".")
-        ? notaFilme === Number(filtroNota)
-        : Math.floor(notaFilme) === Number(filtroNota));
+      const notaFilme = Number(filme.nota_pessoal);
+      const compararNota =
+        filtroNota === "" ||
+        (filtroNota.includes(".")
+          ? notaFilme === Number(filtroNota)
+          : Math.floor(notaFilme) === Number(filtroNota));
 
-    return compararNota && (bateTitulo || bateAtorNoElenco);
-  });
+      return compararNota && (bateTitulo || bateAtorNoElenco);
+    })
+    .sort((a, b) => {
+      if (ordenacaoFilme === "titulo") {
+        return a.titulo.localeCompare(b.titulo, "pt-BR");
+      }
+      if (ordenacaoFilme === "nota_desc") {
+        return (Number(b.nota_pessoal) || 0) - (Number(a.nota_pessoal) || 0);
+      }
+      if (ordenacaoFilme === "nota_asc") {
+        return (Number(a.nota_pessoal) || 0) - (Number(b.nota_pessoal) || 0);
+      }
+      return b.id - a.id;
+    });
 
   const atorFiltrado = atores.filter((ator) =>
     ator.nome.toLowerCase().includes(buscaAtor.trim().toLowerCase()),
@@ -291,9 +307,7 @@ function App() {
       <div className="max-w-5xl mx-auto">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
           <div>
-            <h1 className="text-3xl font-bold text-amber-400">
-              Catálogo de Filmes
-            </h1>
+            <h1 className="text-3xl font-bold text-amber-400">Meus Filmes</h1>
             <div className="flex gap-2 mt-3">
               <button
                 type="button"
@@ -362,6 +376,20 @@ function App() {
                 </button>
               )}
             </div>
+
+            <select
+              aria-label="Ordenar filmes"
+              value={ordenacaoFilme}
+              onChange={(e) =>
+                setOrdenacaoFilme(e.target.value as OrdenacaoFilme)
+              }
+              className="bg-zinc-900 border border-zinc-800 rounded-lg px-4 py-2.5 text-zinc-100 focus:outline-none focus:border-amber-500 transition cursor-pointer"
+            >
+              <option value="recentes">Mais recentes</option>
+              <option value="titulo">Ordem alfabética (A–Z)</option>
+              <option value="nota_desc">Maior nota</option>
+              <option value="nota_asc">Menor nota</option>
+            </select>
           </div>
         ) : (
           <div className="mb-8">
