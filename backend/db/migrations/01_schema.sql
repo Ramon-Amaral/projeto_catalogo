@@ -30,3 +30,7 @@ CREATE TABLE elenco (
   nome_personagem VARCHAR(100) NOT NULL,
   e_protagonista BOOLEAN NOT NULL
 );
+
+ALTER TABLE filmes ADD COLUMN IF NOT EXISTS poster_url TEXT;
+ALTER TABLE atores ADD COLUMN IF NOT EXISTS foto_url TEXT;
+ALTER TABLE atores ALTER COLUMN data_nascimento DROP NOT NULL;
