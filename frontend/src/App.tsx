@@ -14,7 +14,6 @@ type AbaAtiva = "filmes" | "atores";
 function App() {
   const [abaAtiva, setAbaAtiva] = useState<AbaAtiva>("filmes");
 
-  // Estados de Filmes
   const [filmes, setFilmes] = useState<Filme[]>([]);
   const [titulo, setTitulo] = useState("");
   const [sinopse, setSinopse] = useState("");
@@ -24,7 +23,6 @@ function App() {
   const [busca, setBusca] = useState("");
   const [filtroNota, setFiltroNota] = useState("");
 
-  // Estados de Atores
   const [atores, setAtores] = useState<Ator[]>([]);
   const [nomeAtor, setNomeAtor] = useState("");
   const [dataNascimentoAtor, setDataNascimentoAtor] = useState("");
@@ -34,11 +32,10 @@ function App() {
   const [idAtorEditando, setIdAtorEditando] = useState<number | null>(null);
   const [buscaAtor, setBuscaAtor] = useState("");
 
-  // Estados de Elenco
   const [elencos, setElencos] = useState<ElencoItem[]>([]);
-  const [filmeElencoSelecionado, setFilmeElencoSelecionado] = useState<Filme | null>(null);
+  const [filmeElencoSelecionado, setFilmeElencoSelecionado] =
+    useState<Filme | null>(null);
 
-  // Estados gerais
   const [carregando, setCarregando] = useState(true);
   const [salvando, setSalvando] = useState(false);
   const [erro, setErro] = useState("");
@@ -66,7 +63,9 @@ function App() {
       setErro("");
       await sincronizarEmSegundoPlano();
     } catch {
-      setErro("Não foi possível carregar os dados. Verifique se a API está rodando.");
+      setErro(
+        "Não foi possível carregar os dados. Verifique se a API está rodando.",
+      );
     } finally {
       setCarregando(false);
     }
@@ -76,7 +75,6 @@ function App() {
     carregarDados();
   }, []);
 
-  // --- Handlers de Filmes ---
   async function handleSalvarFilme(e: SubmitEvent<HTMLFormElement>) {
     e.preventDefault();
     if (salvando || !titulo.trim()) return;
@@ -126,7 +124,7 @@ function App() {
     setNota_pessoal(
       filme.nota_pessoal !== null && filme.nota_pessoal !== undefined
         ? String(filme.nota_pessoal)
-        : ""
+        : "",
     );
     setModalFilmeAberto(true);
   }
@@ -139,7 +137,6 @@ function App() {
     setModalFilmeAberto(true);
   }
 
-  // --- Handlers de Atores ---
   async function handleSalvarAtor(e: SubmitEvent<HTMLFormElement>) {
     e.preventDefault();
     if (salvando || !nomeAtor.trim()) return;
@@ -180,12 +177,12 @@ function App() {
     setIdAtorEditando(ator.id);
     setNomeAtor(ator.nome);
     setDataNascimentoAtor(
-      ator.data_nascimento ? ator.data_nascimento.slice(0, 10) : ""
+      ator.data_nascimento ? ator.data_nascimento.slice(0, 10) : "",
     );
     setGeneroAtor(
       ator.genero_atuacao && ator.genero_atuacao !== "Atuação"
         ? ator.genero_atuacao
-        : ""
+        : "",
     );
     setPremioAtor(ator.premio || "");
     setModalAtorAberto(true);
@@ -200,7 +197,6 @@ function App() {
     setModalAtorAberto(true);
   }
 
-  // --- Handlers de Elenco ---
   async function handleAdicionarElenco(dados: {
     filme_id: number;
     ator_id: number;
@@ -233,7 +229,6 @@ function App() {
     }
   }
 
-  // --- Exclusão ---
   async function handleConfirmarExclusao() {
     if (!itemExcluindo || excluindo) return;
 
@@ -274,7 +269,7 @@ function App() {
     const termo = busca.trim().toLowerCase();
     const bateTitulo = filme.titulo.toLowerCase().includes(termo);
     const bateAtorNoElenco = elencos.some(
-      (e) => e.filme_id === filme.id && e.ator.toLowerCase().includes(termo)
+      (e) => e.filme_id === filme.id && e.ator.toLowerCase().includes(termo),
     );
 
     const notaFilme = Number(filme.nota_pessoal);
@@ -288,7 +283,7 @@ function App() {
   });
 
   const atorFiltrado = atores.filter((ator) =>
-    ator.nome.toLowerCase().includes(buscaAtor.trim().toLowerCase())
+    ator.nome.toLowerCase().includes(buscaAtor.trim().toLowerCase()),
   );
 
   return (
@@ -327,7 +322,9 @@ function App() {
 
           <button
             type="button"
-            onClick={abaAtiva === "filmes" ? handleAbrirNovoFilme : handleAbrirNovoAtor}
+            onClick={
+              abaAtiva === "filmes" ? handleAbrirNovoFilme : handleAbrirNovoAtor
+            }
             className="bg-amber-500 hover:bg-amber-400 text-zinc-950 font-semibold py-2.5 px-5 rounded-lg transition cursor-pointer"
           >
             {abaAtiva === "filmes" ? "+ Novo Filme" : "+ Novo Ator"}
@@ -350,7 +347,9 @@ function App() {
                 inputMode="decimal"
                 placeholder="Nota (0 a 10)"
                 value={filtroNota}
-                onChange={(e) => validarEntradaNota(e.target.value, setFiltroNota)}
+                onChange={(e) =>
+                  validarEntradaNota(e.target.value, setFiltroNota)
+                }
                 className="w-28 bg-transparent text-zinc-100 placeholder-zinc-500 focus:outline-none"
               />
               {filtroNota !== "" && (
@@ -409,7 +408,9 @@ function App() {
                 <FilmeCard
                   key={filme.id}
                   filme={filme}
-                  totalElenco={elencos.filter((e) => e.filme_id === filme.id).length}
+                  totalElenco={
+                    elencos.filter((e) => e.filme_id === filme.id).length
+                  }
                   onAbrirElenco={setFilmeElencoSelecionado}
                   onEditar={handleSelecionarEdicaoFilme}
                   onExcluir={(id) =>
@@ -421,7 +422,9 @@ function App() {
           )
         ) : atorFiltrado.length === 0 ? (
           <div className="text-center py-16 bg-zinc-900/50 border border-zinc-800/80 rounded-xl">
-            <p className="text-zinc-400 text-lg mb-4">Nenhum ator encontrado.</p>
+            <p className="text-zinc-400 text-lg mb-4">
+              Nenhum ator encontrado.
+            </p>
             <button
               type="button"
               onClick={handleAbrirNovoAtor}
