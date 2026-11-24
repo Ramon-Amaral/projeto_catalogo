@@ -11,16 +11,28 @@ interface TmdbSearchResponse {
   results: TmdbSearchPersonResult[];
 }
 
+export interface TmdbCastCredit {
+  id: number;
+  title?: string;
+  original_title?: string;
+  character?: string;
+  order?: number;
+}
+
 interface TmdbPersonDetails {
   birthday: string | null;
   known_for_department?: string;
   profile_path: string | null;
+  movie_credits?: {
+    cast: TmdbCastCredit[];
+  };
 }
 
 export interface DadosAtorTmdb {
   foto_url: string | null;
   data_nascimento: string | null;
   genero_atuacao: string | null;
+  creditos: TmdbCastCredit[];
 }
 
 const TMDB_BASE_URL = "https://api.themoviedb.org/3";
@@ -51,6 +63,7 @@ export async function buscarDadosAtorNaTmdb(nome: string): Promise<DadosAtorTmdb
         params: {
           api_key: apiKey,
           language: "pt-BR",
+          append_to_response: "movie_credits",
         },
         timeout: 5000,
       }
@@ -64,6 +77,7 @@ export async function buscarDadosAtorNaTmdb(nome: string): Promise<DadosAtorTmdb
       foto_url: caminhoFoto ? `${TMDB_IMAGE_BASE_URL}${caminhoFoto}` : null,
       data_nascimento: detalhes.birthday || null,
       genero_atuacao: departamento === "Acting" ? "Atuação" : departamento || null,
+      creditos: detalhes.movie_credits?.cast || [],
     };
   } catch (error) {
     console.error("Erro ao consultar TMDB API:", error);

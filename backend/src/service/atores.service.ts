@@ -1,5 +1,57 @@
 import pool from "../config/database.js";
-import { buscarDadosAtorNaTmdb } from "./tmdb.service.js";
+import { buscarDadosAtorNaTmdb, type TmdbCastCredit } from "./tmdb.service.js";
+
+function normalizarTitulo(texto?: string): string {
+  return (texto || "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .trim()
+    .toLowerCase();
+}
+
+function tituloCorresponde(tituloBanco: string, credito: TmdbCastCredit): boolean {
+  const banco = normalizarTitulo(tituloBanco);
+  const pt = normalizarTitulo(credito.title);
+  const original = normalizarTitulo(credito.original_title);
+
+  if (!banco) return false;
+  if (banco === pt || banco === original) return true;
+  if (original.startsWith("the ") && original.slice(4) === banco) return true;
+
+  return false;
+}
+
+async function vincularAtorAosFilmesExistentes(atorId: number, creditos: TmdbCastCredit[]) {
+  if (creditos.length === 0) return;
+
+  const filmesResult = await pool.query<{ id: number; titulo: string }>(
+    "SELECT id, titulo FROM filmes"
+  );
+
+  for (const filme of filmesResult.rows) {
+    const participacao = creditos.find((credito) =>
+      tituloCorresponde(filme.titulo, credito)
+    );
+
+    if (!participacao) continue;
+
+    const jaVinculado = await pool.query(
+      "SELECT id FROM elenco WHERE filme_id = $1 AND ator_id = $2",
+      [filme.id, atorId]
+    );
+
+    if (jaVinculado.rows.length > 0) continue;
+
+    const personagem = participacao.character?.trim() || "Não informado";
+    const eProtagonista = (participacao.order ?? 99) <= 2;
+
+    await pool.query(
+      `INSERT INTO elenco (filme_id, ator_id, nome_personagem, e_protagonista)
+       VALUES ($1, $2, $3, $4)`,
+      [filme.id, atorId, personagem, eProtagonista]
+    );
+  }
+}
 
 export async function listarAtoresService() {
   const resultado = await pool.query("SELECT * FROM atores ORDER BY nome ASC");
@@ -31,8 +83,13 @@ export async function inserirNovoAtorService(
 
   const valores = [nome, dataFinal, generoFinal, premio || null, fotoFinal];
   const resultado = await pool.query(queryText, valores);
+  const novoAtor = resultado.rows[0];
 
-  return resultado.rows[0];
+  if (novoAtor && dadosTmdb?.creditos) {
+    await vincularAtorAosFilmesExistentes(novoAtor.id, dadosTmdb.creditos);
+  }
+
+  return novoAtor;
 }
 
 export async function atualizarAtorService(
@@ -61,8 +118,13 @@ export async function atualizarAtorService(
 
   const valores = [nome, dataFinal, generoFinal, premio || null, fotoFinal, id];
   const resultado = await pool.query(queryText, valores);
+  const atorAtualizado = resultado.rows[0] || null;
 
-  return resultado.rows[0] || null;
+  if (atorAtualizado && dadosTmdb?.creditos) {
+    await vincularAtorAosFilmesExistentes(atorAtualizado.id, dadosTmdb.creditos);
+  }
+
+  return atorAtualizado;
 }
 
 export async function atualizarColunaAtoresService(campos: string[], valores: any[], id: string) {
