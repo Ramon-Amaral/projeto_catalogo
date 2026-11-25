@@ -82,11 +82,11 @@ export function FilmeModal({
 
           <div>
             <label className="block text-sm font-medium text-zinc-300 mb-1">
-              Sinopse
+              Review
             </label>
             <textarea
               rows={3}
-              placeholder="Breve descrição ou comentário sobre o filme..."
+              placeholder="Escreva sua opinião ou comentário sobre o filme..."
               value={sinopse}
               onChange={(e) => onChangeSinopse(e.target.value)}
               disabled={salvando}

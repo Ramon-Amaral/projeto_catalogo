@@ -11,16 +11,18 @@ CREATE TABLE filmes (
   roteirista VARCHAR(100) NOT NULL,
   premios VARCHAR(250),
   sinopse TEXT NOT NULL,
-  nota_pessoal DECIMAL(3,1) NOT NULL, 
-  nota_rotten VARCHAR(10)
+  nota_pessoal DECIMAL(3,1) NOT NULL,
+  nota_rotten VARCHAR(10),
+  poster_url TEXT
 );
 
 CREATE TABLE atores (
   id SERIAL PRIMARY KEY,
   nome VARCHAR(100) NOT NULL,
-  data_nascimento DATE NOT NULL,
+  data_nascimento DATE,
   genero_atuacao VARCHAR(50),
-  premio VARCHAR(250)
+  premio VARCHAR(250),
+  foto_url TEXT
 );
 
 CREATE TABLE elenco (
@@ -30,7 +32,3 @@ CREATE TABLE elenco (
   nome_personagem VARCHAR(100) NOT NULL,
   e_protagonista BOOLEAN NOT NULL
 );
-
-ALTER TABLE filmes ADD COLUMN IF NOT EXISTS poster_url TEXT;
-ALTER TABLE atores ADD COLUMN IF NOT EXISTS foto_url TEXT;
-ALTER TABLE atores ALTER COLUMN data_nascimento DROP NOT NULL;

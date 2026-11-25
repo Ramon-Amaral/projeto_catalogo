@@ -15,6 +15,21 @@ export function FilmeCard({
   onEditar,
   onExcluir,
 }: FilmeCardProps) {
+  const valorRotten =
+    filme.nota_rotten !== null && filme.nota_rotten !== undefined
+      ? String(filme.nota_rotten).trim()
+      : "";
+
+  const matchRotten = valorRotten.match(/^(\d{1,3})%$/);
+  const percentualRotten = matchRotten ? Number(matchRotten[1]) : null;
+
+  const temNotaRotten =
+    percentualRotten !== null &&
+    percentualRotten >= 0 &&
+    percentualRotten <= 100;
+
+  const notaRottenFormatada = temNotaRotten ? `${percentualRotten}%` : null;
+
   return (
     <div className="bg-zinc-900 border border-zinc-800 p-5 rounded-xl flex flex-col justify-between gap-4">
       <div>
@@ -44,6 +59,22 @@ export function FilmeCard({
           {filme.nota_pessoal !== null && filme.nota_pessoal !== undefined && (
             <span className="inline-block bg-amber-500/10 text-amber-400 border border-amber-500/30 text-xs font-bold px-2.5 py-1 rounded-md">
               Nota: {filme.nota_pessoal}
+            </span>
+          )}
+
+          {notaRottenFormatada ? (
+            <span
+              title="Avaliação da crítica no Rotten Tomatoes"
+              className="inline-block bg-red-500/10 text-red-400 border border-red-500/30 text-xs font-bold px-2.5 py-1 rounded-md"
+            >
+              🍅 {notaRottenFormatada}
+            </span>
+          ) : (
+            <span
+              title="Nota do Rotten Tomatoes indisponível para este título"
+              className="inline-block bg-zinc-800/80 text-zinc-400 border border-zinc-700/60 text-xs font-medium px-2.5 py-1 rounded-md"
+            >
+              🍅 N/A
             </span>
           )}
 

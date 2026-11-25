@@ -1,7 +1,5 @@
-import { error } from "node:console";
 import pool from "../config/database.js";
-import { buscarFilmeNaOmdb } from "./omdb.service.js";
-import { extrairNotaRotten } from "./omdb.service.js";
+import { buscarFilmeNaOmdb, obterNotaRotten } from "./omdb.service.js";
 
 export async function listarFilmesService() {
   const resultado = await pool.query("SELECT * FROM filmes");
@@ -30,13 +28,14 @@ export async function inserirFilmeNovoService(
   const ano_lancamento = parseInt(dadosOmdb.Year || "0", 10);
   const roteirista = dadosOmdb.Writer || "Desconhecido";
   const premios = dadosOmdb.Awards || "N/A";
-  const nota_rotten = extrairNotaRotten(dadosOmdb.Ratings);
-  const poster_url = dadosOmdb.Poster && dadosOmdb.Poster !== "N/A" ? dadosOmdb.Poster : null;
+  const nota_rotten = await obterNotaRotten(dadosOmdb);
+  const poster_url =
+    dadosOmdb.Poster && dadosOmdb.Poster !== "N/A" ? dadosOmdb.Poster : null;
 
   const filmeInserido = `
-      INSERT INTO filmes (titulo, genero, diretor, ano_lancamento, roteirista, sinopse, nota_pessoal, premios, nota_rotten, poster_url)
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
-      RETURNING *`;
+    INSERT INTO filmes (titulo, genero, diretor, ano_lancamento, roteirista, sinopse, nota_pessoal, premios, nota_rotten, poster_url)
+    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+    RETURNING *`;
 
   const valores = [
     titulo,
@@ -72,11 +71,15 @@ export async function atualizarFilmeService(
   const ano_lancamento = parseInt(dadosOmdb.Year || "0", 10);
   const roteirista = dadosOmdb.Writer || "Desconhecido";
   const premios = dadosOmdb.Awards || "N/A";
-  const nota_rotten = extrairNotaRotten(dadosOmdb.Ratings);
-  const poster_url = dadosOmdb.Poster && dadosOmdb.Poster !== "N/A" ? dadosOmdb.Poster : null
+  const nota_rotten = await obterNotaRotten(dadosOmdb);
+  const poster_url =
+    dadosOmdb.Poster && dadosOmdb.Poster !== "N/A" ? dadosOmdb.Poster : null;
 
   const filmeAtualizado = await pool.query(
-    "UPDATE filmes  SET titulo = $1, genero = $2, diretor = $3, ano_lancamento = $4, roteirista = $5, sinopse = $6, nota_pessoal=$7, premios = $8, nota_rotten = $9, poster_url =$10 WHERE id = $11 RETURNING *",
+    `UPDATE filmes
+     SET titulo = $1, genero = $2, diretor = $3, ano_lancamento = $4, roteirista = $5, sinopse = $6, nota_pessoal = $7, premios = $8, nota_rotten = $9, poster_url = $10
+     WHERE id = $11
+     RETURNING *`,
     [
       titulo,
       genero,
