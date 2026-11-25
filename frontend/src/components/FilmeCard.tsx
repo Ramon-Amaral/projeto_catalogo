@@ -15,17 +15,6 @@ export function FilmeCard({
   onEditar,
   onExcluir,
 }: FilmeCardProps) {
-  const temNotaRotten =
-    filme.nota_rotten !== null &&
-    filme.nota_rotten !== undefined &&
-    String(filme.nota_rotten).trim() !== "";
-
-  const notaRottenFormatada = temNotaRotten
-    ? String(filme.nota_rotten).includes("%")
-      ? String(filme.nota_rotten)
-      : `${filme.nota_rotten}%`
-    : null;
-
   return (
     <div className="bg-zinc-900 border border-zinc-800 p-5 rounded-xl flex flex-col justify-between gap-4">
       <div>
@@ -55,12 +44,6 @@ export function FilmeCard({
           {filme.nota_pessoal !== null && filme.nota_pessoal !== undefined && (
             <span className="inline-block bg-amber-500/10 text-amber-400 border border-amber-500/30 text-xs font-bold px-2.5 py-1 rounded-md">
               Nota: {filme.nota_pessoal}
-            </span>
-          )}
-
-          {notaRottenFormatada && (
-            <span className="inline-block bg-red-500/10 text-red-400 border border-red-500/30 text-xs font-bold px-2.5 py-1 rounded-md">
-              🍅 {notaRottenFormatada}
             </span>
           )}
 

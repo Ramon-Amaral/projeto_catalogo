@@ -8,6 +8,6 @@ export interface Filme {
   sinopse: string;
   nota_pessoal: number;
   premios: string;
-  nota_rotten: number | string | null;
+  nota_rotten: number | null;
   poster_url?: string | null;
 }
